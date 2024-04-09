@@ -1,53 +1,40 @@
-import React, {useState} from 'react';
-import {view,Text,StyleSheet,TouchableOpacity, View} from 'react-native';
-import {} from './style';
-export default function App(){
-  const[counter,setCounter]=useState(0);
-  const increment=()=>{
-    setCounter(counter+1);
-  };
-  const decrement=()=>{
-    if(counter>0){
-      setCounter(counter-1);
+import React,{useState} from 'react';
+import { TouchableOpacity,Text,View,ActivityIndicator } from 'react-native';
+const MyComponent=()=>{
+  const[isLoading,setIsLoading]=useState(false);
+  const[data,setData]=useState(null);
+  const[error,setError]=useState(null);
+  const fetchData=async()=>{
+    setIsLoading(true);
+    try{
+      const response=await fetch('https://jsonplaceholder.typicode.com/photos');
+      const jsonData=await response.json();
+      setData(jsonData);
+    }
+    catch(error){
+      setError(error);
+    }
+    finally{
+      setIsLoading(false);
     }
   };
   return(
-    <View style={style.container}>
-      <TouchableOpacity onPress={()=>decrement()}>
-        <View style={style.customButton}>
-          <Text style={style.buttonText}>-</Text>
-        </View>
+    <View style={{flex:1,justifyContent:'center',alignItems:'center'}}>
+      <TouchableOpacity
+      onPress={fetchData}
+      activeOpacity={0.7}
+      style={{backgroundColor:'blue',padding:10,borderRadius:5}}>
+        <Text style={{color:'white',textAlign:'center'}}>Fetch Data</Text>
       </TouchableOpacity>
-      {/* */}
-      <Text style={style.counterText}>{counter}</Text>
-      {/* */}
-      <TouchableOpacity onPress={()=>increment()}>
-        <View style={style.customButton}>
-          <Text style={style.buttonText}>+</Text>
-        </View>
-      </TouchableOpacity>
+      {isLoading&&<ActivityIndicator style={{marginTop:20}}/>}
+      {error && <Text style={{marginTop:20}}>Error:{error.message}</Text>}
+      {data &&(
+        <View style={{marginTop:20}}>
+          <Text>Data Fetched successfully:</Text>
+          <Text>{JSON.stringify(data)}</Text>
+          </View>
+      )}
     </View>
   );
-}
-const style=StyleSheet.create({
-  container:{
-    flex:1,
-    justifyContent:'space-around',
-    alignItems:'center',
-    flexDirection:'row'
-  },
-  customButton:{
-    backgroundColor:'blue',
-    height:50,
-    width:50,
-  },
-  buttonText:{
-    color:'#fff',
-    fontSize:30,
-    textAlign:'center',
-  },
-  counterText:{
-    fontSize:40,
-  }
-})
-export{style};
+};
+export default MyComponent;
